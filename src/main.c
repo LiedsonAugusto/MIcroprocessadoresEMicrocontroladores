@@ -11,9 +11,8 @@
 
 #include "stm32f4xx.h"
 
-void atraso(){
-	int atraso = 1000000;
-	while(atraso) {--atraso;}
+void atraso(int tempo){
+	while(tempo) {--tempo;}
 }
 
 void piscarLedsAlternado(){
@@ -26,13 +25,12 @@ void piscarLedsAlternado(){
 
 		GPIOA->ODR |= (1 << 6);
 		GPIOA->ODR &= ~(1 << 7);
-		atraso();
+		atraso(1000000);
 
 		GPIOA->ODR |= (1 << 7);
 		GPIOA->ODR &= ~(1 << 6);
-		atraso();
+		atraso(1000000);
 	}
-
 }
 
 void apertarBotaoEAcender(){
@@ -59,9 +57,9 @@ void apertarBotaoEAcender(){
 			GPIOA->ODR |= (1 << 6);
 		} else {
 			GPIOA->ODR &= ~(1 << 6);
+		}
 	}
 }
-
 
 void apertaUmAcendeSempreApertaOutroApaga(){
 	RCC->AHB1ENR |= 1;
@@ -91,15 +89,32 @@ void apertaUmAcendeSempreApertaOutroApaga(){
 					GPIOA->ODR |= (1 << 6);
 					break;
 				}
-
 			}
 		}
+	}
+}
+
+void apitarBuzina(){
+
+	RCC->AHB1ENR |= 1 << 2;
+	GPIOC->MODER |= (0b01 << 22);
+
+	while(1){
+		GPIOC->ODR |= (1<<11);
+		atraso(300000);
+		GPIOC->ODR &= ~(1<<11);
+		atraso(300000);
+		GPIOC->ODR |= (1<<11);
+		atraso(300000);
+		GPIOC->ODR &= ~(1<<11);
+		atraso(4000000);
+
 	}
 }
 
 
 int main(void)
 {
-
+	apitarBuzina();
 	for(;;);
 }
