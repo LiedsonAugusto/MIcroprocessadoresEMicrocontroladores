@@ -10,6 +10,13 @@
 
 
 #include "stm32f4xx.h"
+#define PINO3 !(GPIOE->IDR & (1<<3))
+#define PINO4 !(GPIOE->IDR & (1<<4))
+#define LED1_ON (GPIOA->ODR &= ~(1<<6))
+#define LED1_OFF (GPIOA->ODR |= (1<<6))
+#define LED2_ON (GPIOA->ODR &= ~(1<<7))
+#define LED2_OFF (GPIOA->ODR |= (1<<7))
+
 
 void atraso(int tempo){
 	while(tempo) {--tempo;}
@@ -115,6 +122,42 @@ void apitarBuzina(){
 
 int main(void)
 {
-	apitarBuzina();
-	for(;;);
+	RCC->AHB1ENR |= 1;         //habilita o clock do GPIOA
+	RCC->AHB1ENR |= 1<<4;    //habilita o clock do GPIOE
+
+	//configurando PA6 como saída (o pino PA6 tem um LED conectado)
+	GPIOA->MODER |= (0b01 << 12);
+	//configurando PA7 como saída (o pino PA6 tem um LED conectado)
+	GPIOA->MODER |= (0b01 << 14);
+
+	//Configurando o pino PE3 como entrada
+	GPIOE->MODER &= ~(0b11 << 6);
+	GPIOE->PUPDR |= (0b01 << 6);    //habilita o resistor de pull up para garantir nível lógico alto quando o botão estiver solto
+	//Configurando o pino PE4 como entrada
+	GPIOE->MODER &= ~(0b11 << 8);
+	GPIOE->PUPDR |= (0b01 << 8);    //habilita o resistor de pull up para garantir nível lógico alto quando o botão estiver solto
+
+	while(1)
+	{
+		LED1_OFF;
+		LED2_OFF;
+		int verificarPin = 0;
+
+		if (PINO4 && !(PINO3)){
+			verificarPin = 1;
+		}
+
+		if (!(PINO4) && PINO3){
+			verificarPin = 1;
+		}
+
+		if (verificarPin && (PINO3 && PINO4)){
+			LED1_ON;
+			LED2_ON;
+		}
+
+
+	}
+
+
 }
