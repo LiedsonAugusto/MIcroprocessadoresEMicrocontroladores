@@ -10,6 +10,9 @@
 
 
 #include "stm32f4xx.h"
+#include "Utility.h"
+#include "questoes.h"
+
 #define PINO3 !(GPIOE->IDR & (1<<3))
 #define PINO4 !(GPIOE->IDR & (1<<4))
 #define LED1_ON (GPIOA->ODR &= ~(1<<6))
@@ -119,9 +122,7 @@ void apitarBuzina(){
 	}
 }
 
-
-int main(void)
-{
+void ligaEmOrdemCerta(){
 	RCC->AHB1ENR |= 1;         //habilita o clock do GPIOA
 	RCC->AHB1ENR |= 1<<4;    //habilita o clock do GPIOE
 
@@ -136,28 +137,26 @@ int main(void)
 	//Configurando o pino PE4 como entrada
 	GPIOE->MODER &= ~(0b11 << 8);
 	GPIOE->PUPDR |= (0b01 << 8);    //habilita o resistor de pull up para garantir nível lógico alto quando o botão estiver solto
-
+	int verificarPin = 0;
 	while(1)
 	{
 		LED1_OFF;
 		LED2_OFF;
-		int verificarPin = 0;
-
-		if (PINO4 && !(PINO3)){
+		if (PINO4 && !PINO3){
 			verificarPin = 1;
 		}
-
-		if (!(PINO4) && PINO3){
-			verificarPin = 1;
+		if (!PINO4 && PINO3){
+			verificarPin = 0;
 		}
-
-		if (verificarPin && (PINO3 && PINO4)){
+		if ((PINO3 && PINO4) && verificarPin == 1){
 			LED1_ON;
 			LED2_ON;
 		}
-
-
 	}
+}
 
+int main(void)
+{
 
+	questao4();
 }
