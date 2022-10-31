@@ -274,7 +274,35 @@ void questao10(){
 	}
 }
 
+void questao11(){
+
+	Configure_Clock();
+	Delay_Start();
+
+	RCC->AHB1ENR |= 1;
+	GPIOA->MODER |= (0b01 << 0);
+	GPIOA->MODER |= (0b01 << 2);
+	GPIOA->MODER |= (0b01 << 4);
+	GPIOA->MODER |= (0b01 << 6);
+	GPIOA->MODER |= (0b01 << 8);
+	GPIOA->MODER |= (0b01 << 10);
+	GPIOA->MODER |= (0b01 << 12);
+	GPIOA->MODER |= (0b01 << 14);
+
+
+	while(1){
+		for (int i = 0; i < 256; i++){
+
+			GPIOA->ODR = i;
+			Delay_ms(250);
+		}
+	}
+
+}
 void questao12(){
+
+	Configure_Clock();
+	Delay_Start();
 
 	RCC->AHB1ENR |= 1;
 
@@ -290,20 +318,17 @@ void questao12(){
 	while(1){
 
 		for(int i = 1; i < 9;i++){
-
 			GPIOA->ODR |= (1 << i);
 			Delay_ms(250);
 			GPIOA->ODR &= ~(1 << i);
-			Delay_ms(250);
-
 		}
 
-		for(int i = 8; i > 0;i--){
+		Delay_ms(500);
 
+		for(int i = 8; i > 0;i--){
 			GPIOA->ODR |= (1 << i);
 			Delay_ms(250);
 			GPIOA->ODR &= ~(1 << i);
-			Delay_ms(250);
 
 		}
 
@@ -319,41 +344,89 @@ void questao13(){
 	RCC->AHB1ENR |= 1;
 	RCC->AHB1ENR |= (1 << 1);
 
+	GPIOA->MODER |= (0b01 << 2); //RED
+	GPIOA->MODER |= (0b01 << 4); //YELLOW
+	GPIOA->MODER |= (0b01 << 6); //GREEN
+
 	GPIOA->MODER |= (0b01 << 8); //RED
 	GPIOA->MODER |= (0b01 << 10); //YELLOW
 	GPIOA->MODER |= (0b01 << 12); //GREEN
 
-	GPIOB->MODER |= (0b01 << 8); //RED
-	GPIOB->MODER |= (0b01 << 10); //YELLOW
-	GPIOB->MODER |= (0b01 << 12); //GREEN
+	while(1){
+
+		GPIOA->ODR |= (1 << 4);
+		GPIOA->ODR |= (1 << 3);
+
+		Delay_ms(500);
+
+		GPIOA->ODR &= ~(1 << 3);
+		GPIOA->ODR |= (1 << 2);
+
+		Delay_ms(500);
+
+		GPIOA->ODR &= ~(1 << 2);
+		GPIOA->ODR &= ~(1 << 4);
+		GPIOA->ODR |= (1 << 1);
+		GPIOA->ODR |= (1 << 6);
+
+		Delay_ms(500);
+
+		GPIOA->ODR &= ~(1 << 6);
+		GPIOA->ODR |= (1 << 5);
+
+		Delay_ms(500);
+
+		GPIOA->ODR &= ~(1 << 1);
+		GPIOA->ODR &= ~(1 << 5);
+		GPIOA->ODR |= (1 << 4);
+		GPIOA->ODR |= (1 << 3);
+
+
+	}
+}
+
+void questao14(){
+
+	Configure_Clock();
+	Delay_Start();
+	RCC->AHB1ENR |= 1;
+
+	GPIOA->MODER |= (0b01 << 0);
+	GPIOA->MODER |= (0b01 << 2);
+	GPIOA->MODER |= (0b01 << 4);
+	GPIOA->MODER |= (0b01 << 6);
+	GPIOA->MODER |= (0b01 << 8);
+	GPIOA->MODER |= (0b01 << 10);
+	GPIOA->MODER |= (0b01 << 12);
+
+	const uint8_t mask[16]={ 0b00111111, //0
+		0b00000110, //1
+		0b01011011, //2
+		0b01001111, //3
+		0b01100110, //4
+		0b01101101, //5
+		0b01111101, //6
+		0b00000111, //7
+		0b01111111, //8
+		0b01101111, //9
+		0b01110111, //A
+		0b01111100, //B
+		0b00111001, //C
+		0b01011110, //D
+		0b01111001, //E
+		0b01110001}; //F
 
 	while(1){
 
-		GPIOA->ODR |= (0b01 << 6);
-		GPIOB->ODR |= (0b01 << 4);
+		for (int i = 0; i < 16; i++){
+			GPIOA->ODR = mask[i];
+			Delay_ms(500);
+		}
 
-		Delay_ms(500);
-
-		GPIOA->ODR &= ~(0b11 << 6);
-		GPIOA->ODR |= (0b01 << 5);
-
-		Delay_ms(500);
-
-		GPIOA->ODR &= ~(0b11 << 5);
-		GPIOA->ODR |= (0b01 << 4);
-		GPIOB->ODR |= (0b01 << 6);
-
-		Delay_ms(500);
-
-		GPIOB->ODR &= ~(0b11 << 6);
-		GPIOB->ODR |= (0b01 << 5);
-
-		Delay_ms(500);
-
-		GPIOB->ODR &= ~(0b11 << 5);
-		GPIOB->ODR |= (0b01 << 4);
-		GPIOA->ODR &= ~(0b11 << 4);
-		GPIOA->ODR |= (0b01 << 6);
+		for (int i = 14; i >= 0; i--){
+			GPIOA->ODR = mask[i];
+			Delay_ms(500);
+		}
 
 	}
 }
@@ -415,22 +488,13 @@ void questao23(){
 
 	GPIOE->MODER &= ~(0b11 << 8);
 	GPIOE->PUPDR |= (0b01 << 8);
+	int ligado = 0, bool = 0;
+
+
+
 
 	while(1){
-		uint32_t entrada = GPIOE->IDR;
-		if (entrada & (1 << 4)){
-			GPIOA->ODR |= (0b01 << 6);
-		} else {
-			while (1){
-				uint32_t entrada2 = GPIOE->IDR;
-				if (entrada2 & (1 << 4)){
-					GPIOA->ODR &= ~(0b11 << 6);
-				} else {
-					GPIOA->ODR |= (0b01 << 6);
-					break;
-				}
-			}
-		}
+
 	}
 }
 
@@ -465,6 +529,59 @@ void questao24(){
 			LED2_ON;
 		}
 	}
+}
+
+void questao25(){
+	RCC->AHB1ENR |= 1;         //habilita o clock do GPIOA
+	RCC->AHB1ENR |= 1<<4;    //habilita o clock do GPIOE
+
+	//configurando PA6 como saída (o pino PA6 tem um LED conectado)
+	GPIOA->MODER |= (0b01 << 12);
+	//configurando PA7 como saída (o pino PA6 tem um LED conectado)
+	GPIOA->MODER |= (0b01 << 14);
+
+	//Configurando o pino PE3 como entrada
+	GPIOE->MODER &= ~(0b11 << 6);
+	GPIOE->PUPDR |= (0b01 << 6);    //habilita o resistor de pull up para garantir nível lógico alto quando o botão estiver solto
+	//Configurando o pino PE4 como entrada
+	GPIOE->MODER &= ~(0b11 << 8);
+	GPIOE->PUPDR |= (0b01 << 8);
+
+	Configure_Clock();
+	Delay_Start();
+
+	int verificarPin = 0;
+	int pode = 1;
+
+	while(1){
+		LED1_OFF;
+		LED2_OFF;
+		if (PINO4 && !PINO3 && pode){
+			for(int i = 0; i < 10; i++){
+				if (PINO3){
+					verificarPin = 1;
+					break;
+				} else {
+					Delay_ms(100);
+				}
+			}
+			if (!verificarPin){
+				pode = 0;
+			}
+		}
+		if (!PINO4 && PINO3){
+			verificarPin = 0;
+
+		pode = 1;
+
+		}
+		if ((PINO3 && PINO4) && verificarPin == 1){
+			LED1_ON;
+			LED2_ON;
+			continue;
+		}
+	}
+
 }
 
 
