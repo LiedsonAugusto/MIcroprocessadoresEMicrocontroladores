@@ -158,5 +158,5 @@ void ligaEmOrdemCerta(){
 int main(void)
 {
 
-	questao25();
+	questao23();
 }

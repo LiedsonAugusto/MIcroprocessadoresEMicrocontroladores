@@ -450,6 +450,30 @@ void questao21(){
 	}
 }
 
+void questao17(){
+	Configure_Clock();
+	Delay_Start();
+	RCC->AHB1ENR |= 1;
+
+	GPIOA->MODER |= (0b01 << 2);
+
+	while (1){
+		for (int i = 600; i < 2400; i++){
+			GPIOA->ODR |= (1 << 1);
+			Delay_us(i);
+			GPIOA->ODR &= ~(1 << 1);
+			Delay_us(20000 - i);
+		}
+
+		for (int i = 2400; i >= 600; i--){
+			GPIOA->ODR |= (1 << 1);
+			Delay_us(i);
+			GPIOA->ODR &= ~(1 << 1);
+			Delay_us(20000 - i);
+		}
+	}
+}
+
 void questao22(){
 
 	RCC->AHB1ENR |= 1;
@@ -488,12 +512,26 @@ void questao23(){
 
 	GPIOE->MODER &= ~(0b11 << 8);
 	GPIOE->PUPDR |= (0b01 << 8);
-	int ligado = 0, bool = 0;
 
-
-
+	int ligado = 0;
+	LED1_OFF;
+	Configure_Clock();
+	Delay_Start();
 
 	while(1){
+
+
+		if (PINO4 && !ligado){
+			ligado = 1;
+			LED1_ON;
+			Delay_ms(250);
+		}
+		if (PINO4 && ligado){
+			ligado = 0;
+			LED1_OFF;
+			Delay_ms(250);
+		}
+
 
 	}
 }
@@ -579,6 +617,49 @@ void questao25(){
 			LED1_ON;
 			LED2_ON;
 			continue;
+		}
+	}
+
+}
+
+void questao26(){
+	Configure_Clock();
+	Delay_Start();
+
+	RCC->AHB1ENR |= 1;
+	RCC->AHB1ENR |= 1 << 4;
+
+	GPIOA->MODER |= (0b01 << 2);
+
+	GPIOE->MODER &= ~(0b11 << 6);
+	GPIOE->PUPDR |= (0b01 << 6);
+	GPIOE->MODER &= ~(0b11 << 8);
+	GPIOE->PUPDR |= (0b01 << 8);
+
+	int i = 0;
+
+	while(1){
+		if (PINO4){
+			if (PINO3) break;
+			if (i == 2400) break;
+			for (i; i < 2400; i++){
+				GPIOA->ODR |= (1 << 1);
+				Delay_us(i);
+				GPIOA->ODR &= ~(1 << 1);
+				Delay_us(20000 - i);
+			}
+			break;
+		}
+		if (PINO3){
+			if(PINO4) break;
+			if(i == 600) break;
+			for (i; i >= 600; i--){
+				GPIOA->ODR |= (1 << 1);
+				Delay_us(i);
+				GPIOA->ODR &= ~(1 << 1);
+				Delay_us(20000 - i);
+			}
+			break;
 		}
 	}
 
