@@ -10,9 +10,12 @@
 
 #include "Utility.h"
 #include "stm32f4xx.h"
+#include <time.h>
+#include <stdlib.h>
 
 #define PINO3 !(GPIOE->IDR & (1<<3))
 #define PINO4 !(GPIOE->IDR & (1<<4))
+#define PINO_K_UP (GPIOA->IDR & (1<<0))
 #define LED1_ON (GPIOA->ODR &= ~(1<<6))
 #define LED1_OFF (GPIOA->ODR |= (1<<6))
 #define LED2_ON (GPIOA->ODR &= ~(1<<7))
@@ -399,7 +402,8 @@ void questao14(){
 	GPIOA->MODER |= (0b01 << 10);
 	GPIOA->MODER |= (0b01 << 12);
 
-	const uint8_t mask[16]={ 0b00111111, //0
+	const uint8_t mask[16]={
+		0b00111111, //0
 		0b00000110, //1
 		0b01011011, //2
 		0b01001111, //3
@@ -431,6 +435,46 @@ void questao14(){
 	}
 }
 
+void questao17(){
+	Configure_Clock();
+	Delay_Start();
+	RCC->AHB1ENR |= 1;
+
+	GPIOA->MODER |= (0b01 << 2);
+
+	while (1){
+		for (int i = 600; i < 2400; i+=10){
+			GPIOA->ODR |= (1 << 1);
+			Delay_us(i);
+			GPIOA->ODR &= ~(1 << 1);
+			Delay_us(20000 - i);
+		}
+
+		for (int i = 2400; i >= 600; i-=10){
+			GPIOA->ODR |= (1 << 1);
+			Delay_us(i);
+			GPIOA->ODR &= ~(1 << 1);
+			Delay_us(20000 - i);
+		}
+	}
+}
+
+void questao19(){
+	RCC->AHB1ENR |= 1;
+	GPIOA->MODER |= (0b01 << 2);
+	GPIOA->OTYPER |= (1<<1);
+
+	Configure_Clock();
+	Delay_Start();
+
+	while(1){
+		GPIOA->ODR |= (1 << 1);
+		Delay_ms(500);
+		GPIOA->ODR &= ~(1 << 1);
+		Delay_ms(500);
+	}
+}
+
 void questao21(){
 
 	RCC->AHB1ENR |= 1;
@@ -446,30 +490,6 @@ void questao21(){
 			GPIOA->ODR |= (1 << 6);
 		} else {
 			GPIOA->ODR &= ~(1 << 6);
-		}
-	}
-}
-
-void questao17(){
-	Configure_Clock();
-	Delay_Start();
-	RCC->AHB1ENR |= 1;
-
-	GPIOA->MODER |= (0b01 << 2);
-
-	while (1){
-		for (int i = 600; i < 2400; i++){
-			GPIOA->ODR |= (1 << 1);
-			Delay_us(i);
-			GPIOA->ODR &= ~(1 << 1);
-			Delay_us(20000 - i);
-		}
-
-		for (int i = 2400; i >= 600; i--){
-			GPIOA->ODR |= (1 << 1);
-			Delay_us(i);
-			GPIOA->ODR &= ~(1 << 1);
-			Delay_us(20000 - i);
 		}
 	}
 }
@@ -636,34 +656,138 @@ void questao26(){
 	GPIOE->MODER &= ~(0b11 << 8);
 	GPIOE->PUPDR |= (0b01 << 8);
 
-	int i = 0;
+	int i = 600;
 
 	while(1){
+
 		if (PINO4){
-			if (PINO3) break;
-			if (i == 2400) break;
-			for (i; i < 2400; i++){
-				GPIOA->ODR |= (1 << 1);
-				Delay_us(i);
-				GPIOA->ODR &= ~(1 << 1);
-				Delay_us(20000 - i);
+			if(i > 600){
+				i = i + (10*-1);
 			}
-			break;
 		}
+
 		if (PINO3){
-			if(PINO4) break;
-			if(i == 600) break;
-			for (i; i >= 600; i--){
-				GPIOA->ODR |= (1 << 1);
-				Delay_us(i);
-				GPIOA->ODR &= ~(1 << 1);
-				Delay_us(20000 - i);
+			if(i < 2400){
+				i = i + 10;
 			}
-			break;
+		}
+
+		GPIOA->ODR |= (1<<1);
+		Delay_us(i);
+		GPIOA->ODR &= ~(1<<1);
+		Delay_us(20000 - i);
+	}
+
+}
+
+void questao27(){
+
+	Configure_Clock();
+	Delay_Start();
+
+	RCC->AHB1ENR |= 1;
+	RCC->AHB1ENR |= 1 << 3;
+	RCC->AHB1ENR |= 1 << 4;
+
+	GPIOD->MODER |= (0b01 << 0);
+	GPIOD->MODER |= (0b01 << 2);
+	GPIOD->MODER |= (0b01 << 4);
+	GPIOD->MODER |= (0b01 << 6);
+	GPIOD->MODER |= (0b01 << 8);
+	GPIOD->MODER |= (0b01 << 10);
+	GPIOD->MODER |= (0b01 << 12);
+
+	GPIOA->MODER &= ~(0b11 << 0);
+	GPIOA->PUPDR |= (0b10 << 0);
+
+	GPIOE->MODER &= ~(0b11 << 6);
+	GPIOE->PUPDR |= (0b01 << 6);
+
+	GPIOE->MODER &= ~(0b11 << 8);
+	GPIOE->PUPDR |= (0b01 << 8);
+
+	const uint8_t mask[16]={ 0b00111111, //0
+		0b00000110, //1
+		0b01011011, //2
+		0b01001111, //3
+		0b01100110, //4
+		0b01101101, //5
+		0b01111101, //6
+		0b00000111, //7
+		0b01111111, //8
+		0b01101111, //9
+		0b01110111, //A
+		0b01111100, //B
+		0b00111001, //C
+		0b01011110, //D
+		0b01111001, //E
+		0b01110001}; //F
+
+	while(1){
+		if (PINO_K_UP){
+			GPIOD->ODR = mask[1];
+		} else if (PINO4){
+			GPIOD->ODR = mask[2];
+		} else if (PINO3){
+			GPIOD->ODR = mask[3];
+		} else {
+			GPIOD->ODR = 0b00000000;
 		}
 	}
 
 }
 
+void questao30(){
+
+	Configure_Clock();
+	Delay_Start();
+
+	RCC->AHB1ENR |= 1;
+	RCC->AHB1ENR |= 1<<4;
+
+	GPIOA->MODER |= (0b01 << 2);
+	GPIOA->MODER |= (0b01 << 4);
+	GPIOA->MODER |= (0b01 << 6);
+
+	GPIOA->MODER &= ~(0b11 << 0);
+	GPIOA->PUPDR |= (0b01 << 0);
+
+	GPIOE->MODER &= ~(0b11 << 6);
+	GPIOE->PUPDR |= (0b01 << 6);
+
+	GPIOE->MODER &= ~(0b11 << 8);
+	GPIOE->PUPDR |= (0b01 << 8);
+
+	int led1 = -1;
+	int led2 = -1;
+	int led3 = -1;
+
+	while(1){
+
+		//int ordemCerta = 1;
+
+		led1 = rand() % 2;
+
+		led2 = rand() % 2;
+		while(led2 == led1){
+			led2 = rand() % 2;
+		}
+
+		led3 = rand() % 2;
+		while(led3 == led1 || led3 == led2){
+			led3 = rand() % 2;
+		}
+
+		GPIOA->ODR |= (1<< (led1+1));
+		Delay_ms(500);
+		GPIOA->ODR &= ~(1<< (led1+1));
+		GPIOA->ODR |= (1<< (led2+1));
+		Delay_ms(500);
+		GPIOA->ODR &= ~(1<< (led2+1));
+		GPIOA->ODR |= (1<< (led3+1));
+		Delay_ms(500);
+		GPIOA->ODR &= ~(1<< (led3+1));
+	}
+}
 
 #endif
