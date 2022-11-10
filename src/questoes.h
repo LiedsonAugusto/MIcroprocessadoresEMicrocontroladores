@@ -22,6 +22,11 @@
 #define LED2_OFF (GPIOA->ODR |= (1<<7))
 
 
+#define PA0 1
+#define K0 2
+#define K1 3
+
+
 void questao1(){
 	Configure_Clock();
 	Delay_Start();
@@ -435,6 +440,80 @@ void questao14(){
 	}
 }
 
+void questao15(){
+
+	Configure_Clock();
+	Delay_Start();
+	RCC->AHB1ENR |= 1;
+	RCC->AHB1ENR |= 1<<3;
+
+	GPIOA->MODER |= (0b01 << 0);
+	GPIOA->MODER |= (0b01 << 2);
+	GPIOA->MODER |= (0b01 << 4);
+	GPIOA->MODER |= (0b01 << 6);
+	GPIOA->MODER |= (0b01 << 8);
+	GPIOA->MODER |= (0b01 << 10);
+	GPIOA->MODER |= (0b01 << 12);
+	GPIOD->MODER |= (0b01 << 0);
+	GPIOD->MODER |= (0b01 << 2);
+
+	const uint8_t mask[16]={
+			0b00111111, //0
+			0b00000110, //1
+			0b01011011, //2
+			0b01001111, //3
+			0b01100110, //4
+			0b01101101, //5
+			0b01111101, //6
+			0b00000111, //7
+			0b01111111, //8
+			0b01101111, //9
+			0b01110111, //A
+			0b01111100, //B
+			0b00111001, //C
+			0b01011110, //D
+			0b01111001, //E
+			0b01110001}; //F
+
+	while(1){
+
+		for(int i = 0; i < 16; i++){
+			for (int j = 0; j < 16; j++){
+				for (int k = 0; k < 100; k++){
+					GPIOA->ODR = mask[i];
+					GPIOD->ODR |= (1<<0);
+					GPIOD->ODR &= ~(1<<1);
+					Delay_ms(5);
+					GPIOA->ODR = mask[j];
+					GPIOD->ODR |= (1<<0);
+					GPIOD->ODR &= ~(1<<1);
+					Delay_ms(5);
+				}
+			}
+		}
+
+
+		for(int i = 14; i >= 0; i--){
+			for (int j = 14; j >= 0; j--){
+				for (int k = 0; k < 100; k++){
+					GPIOA->ODR = mask[i];
+					GPIOD->ODR |= (1<<0);
+					GPIOD->ODR &= ~(1<<1);
+					Delay_ms(5);
+					GPIOA->ODR = mask[j];
+					GPIOD->ODR |= (1<<0);
+					GPIOD->ODR &= ~(1<<1);
+					Delay_ms(5);
+				}
+			}
+		}
+
+	}
+
+
+
+}
+
 void questao17(){
 	Configure_Clock();
 	Delay_Start();
@@ -764,30 +843,189 @@ void questao30(){
 
 	while(1){
 
-		//int ordemCerta = 1;
+		led1 = (rand() % 3) + 1;
 
-		led1 = rand() % 2;
-
-		led2 = rand() % 2;
+		led2 = (rand() % 3) + 1;
 		while(led2 == led1){
-			led2 = rand() % 2;
+			led2 = (rand() % 3) + 1;
 		}
 
-		led3 = rand() % 2;
+		led3 = (rand() % 3) + 1;
 		while(led3 == led1 || led3 == led2){
-			led3 = rand() % 2;
+			led3 = (rand() % 3) + 1;
 		}
 
-		GPIOA->ODR |= (1<< (led1+1));
+		GPIOA->ODR |= (1<< (led1));
 		Delay_ms(500);
-		GPIOA->ODR &= ~(1<< (led1+1));
-		GPIOA->ODR |= (1<< (led2+1));
+		GPIOA->ODR &= ~(1<< (led1));
+		GPIOA->ODR |= (1<< (led2));
 		Delay_ms(500);
-		GPIOA->ODR &= ~(1<< (led2+1));
-		GPIOA->ODR |= (1<< (led3+1));
+		GPIOA->ODR &= ~(1<< (led2));
+		GPIOA->ODR |= (1<< (led3));
 		Delay_ms(500);
-		GPIOA->ODR &= ~(1<< (led3+1));
+		GPIOA->ODR &= ~(1<< (led3));
+
+		Delay_ms(1000);
+
+		int ordemCorreta[3] = {led1,led2,led3};
+		int ordemUsuario[3];
+
+		int iter = 0;
+
+		while (iter != 3){
+			while(!PINO4 && !PINO3 && PINO_K_UP);
+			while(!PINO_K_UP || PINO3 || PINO4){
+				if (iter == 3){
+					break;
+				}
+				if(!PINO_K_UP){
+					GPIOA->ODR |= (1 << PA0);
+					Delay_ms(250);
+					GPIOA->ODR &= ~(1 << PA0);
+					Delay_ms(250);
+					ordemUsuario[iter] = PA0;
+					iter++;
+					Delay_ms(500);
+				} else if (PINO4){
+					GPIOA->ODR |= (1 << K0);
+					Delay_ms(250);
+					GPIOA->ODR &= ~(1 << K0);
+					Delay_ms(250);
+					ordemUsuario[iter] = K0;
+					iter++;
+					Delay_ms(500);
+				} else if (PINO3){
+					GPIOA->ODR |= (1 << K1);
+					Delay_ms(250);
+					GPIOA->ODR &= ~(1 << K1);
+					Delay_ms(250);
+					ordemUsuario[iter] = K1;
+					iter++;
+					Delay_ms(500);
+				}
+			}
+		}
+
+
+		int ordemCerta = 0;
+		for(int i = 0; i < 3; i++){
+			if (ordemCorreta[i] == ordemUsuario[i]){
+				ordemCerta = 1;
+			} else {
+				ordemCerta = 0;
+				break;
+			}
+		}
+
+		if (ordemCerta){
+			GPIOA->ODR |= (1 << led1);
+			Delay_ms(250);
+			GPIOA->ODR |= (1 << led2);
+			Delay_ms(250);
+			GPIOA->ODR |= (1 << led3);
+			Delay_ms(250);
+
+			GPIOA->ODR &= ~(1 << led1);
+			GPIOA->ODR &= ~(1 << led2);
+			GPIOA->ODR &= ~(1 << led3);
+			Delay_ms(500);
+
+			GPIOA->ODR |= (1 << led1);
+			GPIOA->ODR |= (1 << led2);
+			GPIOA->ODR |= (1 << led3);
+			Delay_ms(500);
+
+
+			GPIOA->ODR &= ~(1 << led1);
+			GPIOA->ODR &= ~(1 << led2);
+			GPIOA->ODR &= ~(1 << led3);
+			Delay_ms(500);
+
+			GPIOA->ODR |= (1 << led1);
+			GPIOA->ODR |= (1 << led2);
+			GPIOA->ODR |= (1 << led3);
+			Delay_ms(500);
+
+
+			GPIOA->ODR &= ~(1 << led1);
+			GPIOA->ODR &= ~(1 << led2);
+			GPIOA->ODR &= ~(1 << led3);
+			Delay_ms(500);
+
+		} else {
+			GPIOA->ODR |= (1 << led1);
+			GPIOA->ODR |= (1 << led2);
+			GPIOA->ODR |= (1 << led3);
+			Delay_ms(2000);
+
+			GPIOA->ODR &= ~(1 << led1);
+			GPIOA->ODR &= ~(1 << led2);
+			GPIOA->ODR &= ~(1 << led3);
+
+		}
+
+		Delay_ms(3000);
+
 	}
 }
+/*
+void questao30geo(){
+
+	void led_on(int i){
+		if (i == 0){
+			LED1_ON;
+			Delay_ms(200);
+			LED1_OFF;
+			Delay_ms(200);
+		}
+		else if (i == 1){
+			LED2_ON;
+			Delay_ms(200);
+			LED2_OFF;
+			Delay_ms(200);
+		} else if (i == 2){
+			LED3_ON;
+			Delay_ms(200);
+			LED3_OFF;
+			Delay_ms(200);
+		}
+	}
+
+
+	int list[3];
+
+	for(int i = 0; i < 3; i++){
+		list[i] = rand() %2;
+		if (list[i] == 1){
+			led_on(i);
+		}
+	}
+
+	for(int i = 0; i < 3; i ++){
+		while(!K0 && !K1 && !K2){
+			if (list[i] == 0){
+				Delay_ms(1000);
+				i += 1;
+				if (i == 3){
+					break;
+				}
+			}
+		}
+		while(K0 || K1 || K2){
+			if ((K0 && i == 0) || (K1 && i == 1) || (K2 && i == 2)){
+				if (list[i] == 1){
+					led_on(i);
+					break;
+				}else{
+					LED_ERROR;
+					i = 0;
+				}
+			} else {
+				LED_ERROR;
+				i = 0;
+			}
+		}
+	} LED_OK;
+}*/
 
 #endif
