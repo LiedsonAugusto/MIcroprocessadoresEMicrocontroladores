@@ -829,7 +829,7 @@ void questao30(){
 	GPIOA->MODER |= (0b01 << 6);
 
 	GPIOA->MODER &= ~(0b11 << 0);
-	GPIOA->PUPDR |= (0b01 << 0);
+	GPIOA->PUPDR |= (0b10 << 0);
 
 	GPIOE->MODER &= ~(0b11 << 6);
 	GPIOE->PUPDR |= (0b01 << 6);
@@ -873,12 +873,12 @@ void questao30(){
 		int iter = 0;
 
 		while (iter != 3){
-			while(!PINO4 && !PINO3 && PINO_K_UP);
-			while(!PINO_K_UP || PINO3 || PINO4){
+			while(!PINO4 && !PINO3 && !PINO_K_UP);
+			while(PINO_K_UP || PINO3 || PINO4){
 				if (iter == 3){
 					break;
 				}
-				if(!PINO_K_UP){
+				if(PINO_K_UP){
 					GPIOA->ODR |= (1 << PA0);
 					Delay_ms(250);
 					GPIOA->ODR &= ~(1 << PA0);
